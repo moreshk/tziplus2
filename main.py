@@ -3,12 +3,12 @@ from datetime import datetime, timedelta
 from plot_chart import plot_chart
 import yfinance as yf
 import pandas as pd
-from utils import calculate_body_and_shadow, identify_fvg
+from utils import calculate_body_and_shadow, identify_fvg, identify_major_highs_lows
 import os
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime=s - %(message=s')
 
 # Define the ticker symbol
 tickerSymbol = '^NSEI'
@@ -48,11 +48,18 @@ tickerData = calculate_body_and_shadow(tickerData)
 # Identify FVGs
 fvg_list = identify_fvg(tickerData)
 
+# Identify major highs and lows
+major_highs, major_lows = identify_major_highs_lows(tickerData)
+
 # Convert the index to integers for pattern detection
 tickerData.reset_index(drop=True, inplace=True)
 
 # Set 'Date' as the index
 tickerData.set_index('Date', inplace=True)
 
-# Plot the chart with FVGs
-plot_chart(tickerData, fvg_list)
+# Plot the chart with FVGs and major highs/lows
+plot_chart(tickerData, fvg_list, major_highs, major_lows)
+
+# Log the major highs and lows
+logging.info(f"Major highs: {major_highs}")
+logging.info(f"Major lows: {major_lows}")
