@@ -8,8 +8,9 @@ import os
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime=s - %(message=s')
-
+# logging.basicConfig(level=logging.INFO, format='%(asctime=s - %(message=s')
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # Define the ticker symbol
 tickerSymbol = '^NSEI'
 

@@ -4,7 +4,9 @@ import logging
 import pandas as pd  # Ensure pandas is imported
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname=s - %(message=s')
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname=s - %(message=s')
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def plot_chart(tickerData, fvg_list, major_highs, major_lows):
     """Create a candlestick chart with colored candles, FVGs, and major highs/lows."""
