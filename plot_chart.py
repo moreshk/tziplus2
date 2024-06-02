@@ -111,6 +111,28 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
                                 line=dict(color="red", width=3, dash="dash"),
                                 fillcolor="red", opacity=0.2)
 
+    # New feature: Check for significant increase post major low with adjusted condition
+    for low_date in major_lows:
+        low_date_str = low_date.strftime('%Y-%m-%d')
+        if low_date_str in tickerData_dates_str:
+            low_index = tickerData_dates_str.index(low_date_str)
+            # Ensure there are enough candles before and after the major low
+            if low_index > 4 and low_index + 5 < len(tickerData):
+                pre_low_data = tickerData.iloc[low_index-5:low_index]
+                post_low_data = tickerData.iloc[low_index+1:low_index+6]
+                
+                pre_low_decrease_rate = (pre_low_data['Low'].min() - tickerData.iloc[low_index]['Low']) / 5
+                post_low_increase_rate = (tickerData.iloc[low_index+5]['High'] - post_low_data['Low'].min()) / 5
+                
+                # Check if the rate of increase is at least twice the rate of decrease
+                if post_low_increase_rate >= 2 * pre_low_decrease_rate:
+                    logging.info(f"Significant increase identified post major low on {low_date_str}, with the increase rate at least twice the decrease rate")
+                    fig.add_shape(type="rect",
+                                x0=low_date_str, x1=tickerData_dates_str[-1],
+                                y0=tickerData.iloc[low_index]['Low'], y1=tickerData.iloc[low_index]['High'],
+                                line=dict(color="blue", width=3, dash="dash"),
+                                fillcolor="blue", opacity=0.3)
+                    
     fig.update_layout(
         yaxis_title='Price',
         xaxis_title='Date',
