@@ -88,6 +88,29 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
                           line=dict(color=color, width=2, dash="dot"))
             # fig.add_annotation(x=bos_date_str, y=y_bos, text=f"{bos_type} BoS", showarrow=True, arrowhead=1)
 
+
+    # New feature: Check for significant drop post major high with adjusted condition
+    for high_date in major_highs:
+        high_date_str = high_date.strftime('%Y-%m-%d')
+        if high_date_str in tickerData_dates_str:
+            high_index = tickerData_dates_str.index(high_date_str)
+            # Ensure there are enough candles before and after the major high
+            if high_index > 4 and high_index + 5 < len(tickerData):
+                pre_high_data = tickerData.iloc[high_index-5:high_index]
+                post_high_data = tickerData.iloc[high_index+1:high_index+6]
+                
+                pre_high_increase_rate = (tickerData.iloc[high_index]['High'] - pre_high_data['Low'].min()) / 5
+                post_high_decline_rate = (post_high_data['High'].max() - tickerData.iloc[high_index+5]['Low']) / 5
+                
+                # Check if the rate of decline is at least twice the rate of increase
+                if post_high_decline_rate >= 2 * pre_high_increase_rate:
+                    logging.info(f"Significant drop identified post major high on {high_date_str}, with the drop rate at least twice the increase rate")
+                    fig.add_shape(type="rect",
+                                x0=high_date_str, x1=tickerData_dates_str[-1],
+                                y0=tickerData.iloc[high_index]['Low'], y1=tickerData.iloc[high_index]['High'],
+                                line=dict(color="red", width=3, dash="dash"),
+                                fillcolor="red", opacity=0.2)
+
     fig.update_layout(
         yaxis_title='Price',
         xaxis_title='Date',
