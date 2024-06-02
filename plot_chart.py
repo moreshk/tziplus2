@@ -8,7 +8,7 @@ import pandas as pd  # Ensure pandas is imported
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def plot_chart(tickerData, fvg_list, major_highs, major_lows):
+def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
     """Create a candlestick chart with colored candles, FVGs, and major highs/lows."""
     fig = go.Figure()
 
@@ -74,6 +74,19 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows):
                           y0=y_low, y1=y_low,
                           line=dict(color="red", width=1, dash="dash"))  # Thinner line
             fig.add_annotation(x=low_str, y=y_low, text="Major Low", showarrow=True, arrowhead=1)
+
+# Add BoS to the chart
+    for bos in bos_list:
+        bos_date, bos_type = bos
+        bos_date_str = bos_date.strftime('%Y-%m-%d')
+        if bos_date_str in tickerData_dates_str:
+            y_bos = tickerData.loc[pd.to_datetime(bos_date_str)]['Close']
+            color = 'blue' if bos_type == 'Bullish' else 'red'
+            fig.add_shape(type="line",
+                          x0=bos_date_str, x1=bos_date_str,
+                          y0=tickerData['Low'].min(), y1=tickerData['High'].max(),
+                          line=dict(color=color, width=2, dash="dot"))
+            fig.add_annotation(x=bos_date_str, y=y_bos, text=f"{bos_type} BoS", showarrow=True, arrowhead=1)
 
     fig.update_layout(
         yaxis_title='Price',

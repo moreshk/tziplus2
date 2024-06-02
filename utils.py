@@ -79,3 +79,44 @@ def identify_major_highs_lows(tickerData, window=5):
     logging.info(f"Total major lows identified: {len(major_lows)}")
     
     return major_highs, major_lows
+
+
+def identify_bos(tickerData, major_highs, major_lows):
+    """
+    Identify Break of Structure (BoS) in the data.
+    
+    A BoS is identified when a candle breaks through a previous major high or low and closes above/below it.
+    
+    Parameters:
+    - tickerData: DataFrame containing the OHLC data.
+    - major_highs: List of indices where major highs are identified.
+    - major_lows: List of indices where major lows are identified.
+    
+    Returns:
+    - bos_list: List of tuples containing the index and type of BoS ('Bullish' or 'Bearish').
+    """
+    bos_list = []
+
+    for i in range(1, len(tickerData)):
+        current_candle = tickerData.iloc[i]
+
+        # Check for Bullish BoS
+        for high in major_highs:
+            if current_candle.name > high:
+                major_high_value = tickerData.loc[high]['High']
+                if current_candle['Open'] < major_high_value and current_candle['Close'] > major_high_value:
+                    bos_list.append((current_candle.name, 'Bullish'))
+                    logging.info(f"Bullish BoS identified at {current_candle.name}")
+                    break
+
+        # Check for Bearish BoS
+        for low in major_lows:
+            if current_candle.name > low:
+                major_low_value = tickerData.loc[low]['Low']
+                if current_candle['Open'] > major_low_value and current_candle['Close'] < major_low_value:
+                    bos_list.append((current_candle.name, 'Bearish'))
+                    logging.info(f"Bearish BoS identified at {current_candle.name}")
+                    break
+
+    logging.info(f"Total BoS identified: {len(bos_list)}")
+    return bos_list
