@@ -62,7 +62,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
                           x0=tickerData_dates_str[0], x1=tickerData_dates_str[-1],
                           y0=y_high, y1=y_high,
                           line=dict(color="green", width=1, dash="dash"))  # Thinner line
-            fig.add_annotation(x=high_str, y=y_high, text="Major High", showarrow=True, arrowhead=1)
+            # fig.add_annotation(x=high_str, y=y_high, text="Major High", showarrow=True, arrowhead=1)
 
     # Add major lows to the chart
     for low in major_lows:
@@ -73,7 +73,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
                           x0=tickerData_dates_str[0], x1=tickerData_dates_str[-1],
                           y0=y_low, y1=y_low,
                           line=dict(color="red", width=1, dash="dash"))  # Thinner line
-            fig.add_annotation(x=low_str, y=y_low, text="Major Low", showarrow=True, arrowhead=1)
+            # fig.add_annotation(x=low_str, y=y_low, text="Major Low", showarrow=True, arrowhead=1)
 
 # Add BoS to the chart
     for bos in bos_list:
@@ -86,7 +86,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
                           x0=bos_date_str, x1=bos_date_str,
                           y0=tickerData['Low'].min(), y1=tickerData['High'].max(),
                           line=dict(color=color, width=2, dash="dot"))
-            fig.add_annotation(x=bos_date_str, y=y_bos, text=f"{bos_type} BoS", showarrow=True, arrowhead=1)
+            # fig.add_annotation(x=bos_date_str, y=y_bos, text=f"{bos_type} BoS", showarrow=True, arrowhead=1)
 
     fig.update_layout(
         yaxis_title='Price',

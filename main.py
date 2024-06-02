@@ -18,7 +18,7 @@ tickerSymbol = '^NSEI'
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=270)  # change to your desired period
+startDate = endDate - timedelta(days=360)  # change to your desired period
 
 # Define the file name for storing the data
 fileName = f"{tickerSymbol}_data_{startDate.strftime('%Y%m%d')}_{endDate.strftime('%Y%m%d')}.csv"
