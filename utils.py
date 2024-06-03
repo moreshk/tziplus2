@@ -72,21 +72,28 @@ def identify_bos(tickerData, major_highs, major_lows):
     return bos_list
 
 
-
-def identify_demand_zones(tickerData, major_lows):
-    """Identify demand zones based on major lows and rate of change."""
+def identify_demand_zones(tickerData, major_lows, candles_count, comparison_multiplier):
+    """Identify demand zones based on major lows and absolute differences, with customizable parameters for analysis."""
     demand_zones = []
     for low_pos in major_lows:
-        if low_pos > 0 and low_pos < len(tickerData) - 1:
-            pre_low = tickerData.iloc[low_pos - 1]['Low']
-            post_low = tickerData.iloc[low_pos + 1]['Low']
+        # Ensure there are enough candles before and after the major low
+        if low_pos > candles_count - 1 and low_pos < len(tickerData) - candles_count:
+            # Get the 'Low' of the candle 'candles_count' positions before the major low
+            pre_low = tickerData.iloc[low_pos - candles_count]['Low']
+            # Get the 'Low' of the candle 'candles_count' positions after the major low
+            post_low = tickerData.iloc[low_pos + candles_count]['Low']
             major_low = tickerData.iloc[low_pos]['Low']
 
-            rate_of_decline = (major_low - pre_low) / pre_low
-            rate_of_increase = (post_low - major_low) / major_low
+            # Calculate the absolute differences instead of rates
+            abs_diff_decline = abs(major_low - pre_low)
+            abs_diff_increase = abs(post_low - major_low)
 
-            # Check if the rate of decline is less than half of the rate of increase
-            if abs(rate_of_decline) < 0.5 * rate_of_increase:
+            # Log the absolute differences for analysis
+            logging.info(f"Absolute difference of decline: {abs_diff_decline}, Absolute difference of increase: {abs_diff_increase}")
+
+            # Corrected comparison check:
+            # Demand zone is identified if the absolute increase is more than the absolute decline by a factor of the comparison_multiplier
+            if abs_diff_increase > comparison_multiplier * abs_diff_decline:
                 demand_zones.append(low_pos)
                 logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
 

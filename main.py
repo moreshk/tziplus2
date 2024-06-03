@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define the ticker symbol
-tickerSymbol = '^NSEI'
+tickerSymbol = '^DJI'
 
 # Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
 interval = '1d'  # Change this to your desired interval
@@ -19,7 +19,7 @@ interval = '1d'  # Change this to your desired interval
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=10)  # change to your desired period
+startDate = endDate - timedelta(days=120)  # change to your desired period
 
 # Before reading the CSV file, determine the correct index column name
 if interval == '1d':
@@ -75,7 +75,7 @@ if not isinstance(tickerData.index, pd.DatetimeIndex):
     tickerData.index = pd.to_datetime(tickerData.index)
 
 # Identify demand zones
-demand_zones = identify_demand_zones(tickerData, major_lows)
+demand_zones = identify_demand_zones(tickerData, major_lows, 10, 3)
 
 # Plot the chart with FVGs and major highs/lows
 plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones)

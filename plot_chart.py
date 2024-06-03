@@ -85,24 +85,40 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
                       line=dict(color=color, width=2, dash="dot"))
 
     
-    # Add demand zones to the chart
+    # # Add demand zones to the chart
+    # for zone_pos in demand_zones:
+    #     if tickerData.iloc[-1]['Close'] > tickerData.iloc[zone_pos]['Low']:  # Check if the latest close price is above the major low
+    #         x0 = tickerData.index[zone_pos]  # Left side of the rectangle
+    #         x1 = tickerData.index[-1]  # Right side of the rectangle extends to the end
+    #         y0 = tickerData.iloc[zone_pos]['Low']
+    #         y1 = y0  # The height of the rectangle is determined by the major low price
+
+    #         logging.info(f"Attempting to add demand zone to chart: Start={x0}, End={x1}, Level={y0}")
+
+    #         fig.add_shape(type="rect",
+    #                     x0=x0, x1=x1,
+    #                     y0=y0, y1=y1,
+    #                     fillcolor="black", opacity=0.4, line_width=3)
+    #     else:
+    #         logging.info(f"Demand zone at position {zone_pos} not added - latest close price not above major low.")
+        
+        # Add demand zones to the chart
     for zone_pos in demand_zones:
         if tickerData.iloc[-1]['Close'] > tickerData.iloc[zone_pos]['Low']:  # Check if the latest close price is above the major low
             x0 = tickerData.index[zone_pos]  # Left side of the rectangle
             x1 = tickerData.index[-1]  # Right side of the rectangle extends to the end
-            y0 = tickerData.iloc[zone_pos]['Low']
-            y1 = y0  # The height of the rectangle is determined by the major low price
+            y0 = tickerData.iloc[zone_pos]['Low']  # Bottom of the rectangle
+            y1 = tickerData.iloc[zone_pos]['High']  # Top of the rectangle, changed from y0 to represent the high of the candle
 
-            logging.info(f"Attempting to add demand zone to chart: Start={x0}, End={x1}, Level={y0}")
+            logging.info(f"Attempting to add demand zone to chart: Start={x0}, End={x1}, Low={y0}, High={y1}")
 
             fig.add_shape(type="rect",
                         x0=x0, x1=x1,
                         y0=y0, y1=y1,
-                        fillcolor="black", opacity=0.4, line_width=0)
+                        fillcolor="blue", opacity=0.3, line_width=0)
         else:
             logging.info(f"Demand zone at position {zone_pos} not added - latest close price not above major low.")
-        
-        
+
     # Determine the interval of the data
     data_interval = tickerData.index[1] - tickerData.index[0]
 
