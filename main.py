@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 from plot_chart import plot_chart
 import yfinance as yf
@@ -8,28 +7,32 @@ import os
 import logging
 
 # Configure logging
-# logging.basicConfig(level=logging.INFO, format='%(asctime=s - %(message=s')
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 # Define the ticker symbol
 tickerSymbol = '^NSEI'
+
+# Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
+interval = '1d'  # Change this to your desired interval
 
 # Get today's date
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=90)  # change to your desired period
+startDate = endDate - timedelta(days=115)  # change to your desired period
 
-# Define the file name for storing the data
-fileName = f"{tickerSymbol}_data_{startDate.strftime('%Y%m%d')}_{endDate.strftime('%Y%m%d')}.csv"
-
+# Define the file name for storing the data, ensuring it's saved in the 'data' folder
+data_folder = 'data'
+if not os.path.exists(data_folder):
+    os.makedirs(data_folder)  # Create the data folder if it doesn't exist
+fileName = f"{data_folder}/{tickerSymbol}_data_{startDate.strftime('%Y%m%d')}_{endDate.strftime('%Y%m%d')}_{interval}.csv"
 # Check if data is already downloaded
 if os.path.exists(fileName):
     # Load data from CSV file
-    tickerData = pd.read_csv(fileName, parse_dates=True, index_col='Date')
+    tickerData = pd.read_csv(fileName, parse_dates=True, index_col='Datetime')
 else:
     # Download data if not already downloaded
-    tickerData = yf.download(tickerSymbol, start=startDate, end=endDate)
+    tickerData = yf.download(tickerSymbol, start=startDate, end=endDate, interval=interval)
     tickerData = tickerData.round(2)
     # Save data to CSV file
     tickerData.to_csv(fileName)
@@ -41,7 +44,7 @@ tickerData.index = pd.to_datetime(tickerData.index)
 logging.info(f"Dates in tickerData: {tickerData.index}")
 
 # Convert the dates into string format without time
-tickerData['Date'] = tickerData.index.strftime('%Y-%m-%d')
+tickerData['Date'] = tickerData.index.strftime('%Y-%m-%d %H:%M:%S' if interval != '1d' else '%Y-%m-%d')
 
 # Calculate body and shadow
 tickerData = calculate_body_and_shadow(tickerData)
@@ -60,6 +63,10 @@ tickerData.reset_index(drop=True, inplace=True)
 
 # Set 'Date' as the index
 tickerData.set_index('Date', inplace=True)
+
+# Ensure the index is a DatetimeIndex and localize or convert timezone if necessary
+if not isinstance(tickerData.index, pd.DatetimeIndex):
+    tickerData.index = pd.to_datetime(tickerData.index)
 
 # Plot the chart with FVGs and major highs/lows
 plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list)

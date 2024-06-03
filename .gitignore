@@ -119,3 +119,5 @@ tziplus2/
 
 # Ignore all CSV files
 *.csv
+
+data/
