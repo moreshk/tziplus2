@@ -72,6 +72,7 @@ def identify_bos(tickerData, major_highs, major_lows):
     return bos_list
 
 
+
 def identify_demand_zones(tickerData, major_lows):
     """Identify demand zones based on major lows and rate of change."""
     demand_zones = []
@@ -87,5 +88,8 @@ def identify_demand_zones(tickerData, major_lows):
             # Check if the rate of decline is less than half of the rate of increase
             if abs(rate_of_decline) < 0.5 * rate_of_increase:
                 demand_zones.append(low_pos)
+                logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
 
+    if not demand_zones:
+        logging.info("No demand zones were identified.")
     return demand_zones

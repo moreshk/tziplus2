@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from plot_chart import plot_chart
 import yfinance as yf
 import pandas as pd
-from utils import calculate_body_and_shadow, identify_fvg, identify_major_highs_lows, identify_bos
+from utils import calculate_body_and_shadow, identify_fvg, identify_major_highs_lows, identify_bos, identify_demand_zones
 import os
 import logging
 
@@ -19,7 +19,13 @@ interval = '1d'  # Change this to your desired interval
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=125)  # change to your desired period
+startDate = endDate - timedelta(days=10)  # change to your desired period
+
+# Before reading the CSV file, determine the correct index column name
+if interval == '1d':
+    index_col_name = 'Date'
+else:
+    index_col_name = 'Datetime'
 
 # Define the file name for storing the data, ensuring it's saved in the 'data' folder
 data_folder = 'data'
@@ -29,7 +35,7 @@ fileName = f"{data_folder}/{tickerSymbol}_data_{startDate.strftime('%Y%m%d')}_{e
 # Check if data is already downloaded
 if os.path.exists(fileName):
     # Load data from CSV file
-    tickerData = pd.read_csv(fileName, parse_dates=True, index_col='Datetime')
+    tickerData = pd.read_csv(fileName, parse_dates=True, index_col=index_col_name)
 else:
     # Download data if not already downloaded
     tickerData = yf.download(tickerSymbol, start=startDate, end=endDate, interval=interval)
@@ -68,8 +74,11 @@ tickerData.set_index('Date', inplace=True)
 if not isinstance(tickerData.index, pd.DatetimeIndex):
     tickerData.index = pd.to_datetime(tickerData.index)
 
+# Identify demand zones
+demand_zones = identify_demand_zones(tickerData, major_lows)
+
 # Plot the chart with FVGs and major highs/lows
-plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list)
+plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones)
 
 # Log the major highs and lows, and BoS
 logging.info(f"Major highs: {major_highs}")
