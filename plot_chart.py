@@ -69,7 +69,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
         fig.add_shape(type="line",
                       x0=x_low_date, x1=tickerData.index[-1],  # Start from the low and extend to the end
                       y0=y_low, y1=y_low,
-                      line=dict(color="red", width=1, dash="dash"))
+                      line=dict(color="black", width=1, dash="dot"))
 
     # Modify BoS to the chart based on position
     for bos in bos_list:
@@ -84,13 +84,30 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list):
                       y0=tickerData['Low'].min(), y1=tickerData['High'].max(),
                       line=dict(color=color, width=2, dash="dot"))
 
+     # Determine the interval of the data
+    data_interval = tickerData.index[1] - tickerData.index[0]
+
+    print("Data interval is:", data_interval)
+    
+    # Set x-axis tick format based on the interval
+    if data_interval.days >= 1:
+        # Daily data or greater, show date in dd-mm format
+        tickformat = '%d-%m'
+    else:
+        # Hourly or minute data, show time in hh:mm format
+        tickformat = '%H:%M'
+
+    print("tickformat is:", tickformat)
+
     fig.update_layout(
         yaxis_title='Price',
         xaxis_title='Date',
         xaxis=dict(
             rangeslider=dict(visible=True),
-            type='category'  # this line will remove the gaps for non-trading days
+            type='category',  # this line will remove the gaps for non-trading days
+            tickformat=tickformat,  # Set the tick format based on the data interval
         ),
+        height=1000  # Adjust this value as needed to make the chart taller
     )
 
     # Show the figure

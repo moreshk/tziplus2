@@ -19,7 +19,7 @@ interval = '1d'  # Change this to your desired interval
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=115)  # change to your desired period
+startDate = endDate - timedelta(days=125)  # change to your desired period
 
 # Define the file name for storing the data, ensuring it's saved in the 'data' folder
 data_folder = 'data'
