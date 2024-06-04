@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from plot_chart import plot_chart
 import yfinance as yf
 import pandas as pd
-from utils import calculate_body_and_shadow, identify_fvg, identify_major_highs_lows, identify_bos, identify_demand_zones
+from utils import calculate_body_and_shadow, identify_fvg, identify_major_highs_lows, identify_bos, identify_demand_zones, identify_supply_zones
 import os
 import logging
 
@@ -10,16 +10,16 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define the ticker symbol
-tickerSymbol = '^DJI'
+tickerSymbol = 'META'
 
 # Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
-interval = '5m'  # Change this to your desired interval
+interval = '1h'  # Change this to your desired interval
 
 # Get today's date
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=10)  # change to your desired period
+startDate = endDate - timedelta(days=120)  # change to your desired period
 
 # Before reading the CSV file, determine the correct index column name
 if interval == '1d':
@@ -75,10 +75,13 @@ if not isinstance(tickerData.index, pd.DatetimeIndex):
     tickerData.index = pd.to_datetime(tickerData.index)
 
 # Identify demand zones
-demand_zones = identify_demand_zones(tickerData, major_lows, 15, 1.1)
+demand_zones = identify_demand_zones(tickerData, major_lows, 10, 1.1)
 
-# Plot the chart with FVGs and major highs/lows
-plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones)
+# After identifying demand zones, add the call to identify supply zones
+supply_zones = identify_supply_zones(tickerData, major_highs, 10, 1.1)  # Adjust parameters as needed
+
+# Update the plot_chart function call to include supply_zones
+plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones, supply_zones)
 
 # Log the major highs and lows, and BoS
 logging.info(f"Major highs: {major_highs}")

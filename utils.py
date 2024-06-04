@@ -70,6 +70,9 @@ def identify_bos(tickerData, major_highs, major_lows):
                     break
     
     return bos_list
+
+
+
 def identify_demand_zones(tickerData, major_lows, candles_count, comparison_multiplier):
     """Identify demand zones based on major lows and absolute differences, with customizable parameters for analysis,
     ensuring no candle to the right has a low lower than the high of the demand zone candle."""
@@ -109,3 +112,45 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
     if not demand_zones:
         logging.info("No demand zones were identified.")
     return demand_zones
+
+
+
+def identify_supply_zones(tickerData, major_highs, candles_count, comparison_multiplier):
+    """Identify supply zones based on major highs and absolute differences, with customizable parameters for analysis,
+    ensuring no candle to the right has a high higher than the low of the supply zone candle."""
+    supply_zones = []
+    for high_pos in major_highs:
+        # Ensure there are enough candles before and after the major high
+        if high_pos > candles_count - 1 and high_pos < len(tickerData) - candles_count:
+            # Get the 'High' of the candle 'candles_count' positions before the major high
+            pre_high = tickerData.iloc[high_pos - candles_count]['High']
+            # Get the 'High' of the candle 'candles_count' positions after the major high
+            post_high = tickerData.iloc[high_pos + candles_count]['High']
+            # Get the 'Low' of the supply zone candle (major high candle)
+            supply_zone_low = tickerData.iloc[high_pos]['Low']
+            major_high = tickerData.iloc[high_pos]['High']
+
+            # Calculate the absolute differences
+            abs_diff_increase = abs(major_high - pre_high)
+            abs_diff_decline = abs(post_high - major_high)
+
+            # Log the absolute differences for analysis
+            logging.info(f"Absolute difference of increase: {abs_diff_increase}, Absolute difference of decline: {abs_diff_decline}")
+
+            # Check if the absolute decline is more than the absolute increase by a factor of the comparison_multiplier
+            if abs_diff_decline > comparison_multiplier * abs_diff_increase:
+                # Check for any candle to the right with a high higher than the high of the supply zone candle
+                invalid_zone = False
+                for i in range(high_pos + 1, len(tickerData)):
+                    if tickerData.iloc[i]['High'] > major_high:
+                        invalid_zone = True
+                        logging.info(f"Candle to the right with higher high found at position {i}, invalidating supply zone at position {high_pos}. Supply zone high: {major_high}, Invalidating candle high: {tickerData.iloc[i]['High']}")
+                        break
+
+                if not invalid_zone:
+                    supply_zones.append(high_pos)
+                    logging.info(f"Supply zone identified at position {high_pos} with major high at {major_high}")
+
+    if not supply_zones:
+        logging.info("No supply zones were identified.")
+    return supply_zones
