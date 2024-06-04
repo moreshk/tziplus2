@@ -40,7 +40,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
         y0 = tickerData.iloc[start_pos]['High'] if fvg_type == 'Bullish' else tickerData.iloc[start_pos]['Low']
         y1 = tickerData.iloc[end_pos]['Low'] if fvg_type == 'Bullish' else tickerData.iloc[end_pos]['High']
         
-        logging.info(f"Adding {fvg_type} FVG shape: Start={tickerData.index[start_pos]}, End={tickerData.index[end_pos]}, Color={color}")
+        # logging.info(f"Adding {fvg_type} FVG shape: Start={tickerData.index[start_pos]}, End={tickerData.index[end_pos]}, Color={color}")
         
         fig.add_shape(type="rect",
                       x0=tickerData.index[start_pos], x1=tickerData.index[end_pos],
@@ -52,7 +52,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
         y_high = tickerData.iloc[high_pos]['High']
         x_high_date = tickerData.index[high_pos]  # Get the date/index of the high
         
-        logging.info(f"Adding major high line: Date={x_high_date}, Y={y_high}")
+        # logging.info(f"Adding major high line: Date={x_high_date}, Y={y_high}")
         
         fig.add_shape(type="line",
                       x0=x_high_date, x1=tickerData.index[-1],  # Start from the high and extend to the end
@@ -64,7 +64,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
         y_low = tickerData.iloc[low_pos]['Low']
         x_low_date = tickerData.index[low_pos]  # Get the date/index of the low
         
-        logging.info(f"Adding major low line: Date={x_low_date}, Y={y_low}")
+        # logging.info(f"Adding major low line: Date={x_low_date}, Y={y_low}")
         
         fig.add_shape(type="line",
                       x0=x_low_date, x1=tickerData.index[-1],  # Start from the low and extend to the end
@@ -77,7 +77,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
         y_bos = tickerData.iloc[bos_pos]['Close']
         color = 'blue' if bos_type == 'Bullish' else 'red'
         
-        logging.info(f"Adding BoS line: Date={tickerData.index[bos_pos]}, Type={bos_type}, Color={color}")
+        # logging.info(f"Adding BoS line: Date={tickerData.index[bos_pos]}, Type={bos_type}, Color={color}")
         
         fig.add_shape(type="line",
                       x0=tickerData.index[bos_pos], x1=tickerData.index[bos_pos],

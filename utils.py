@@ -70,10 +70,9 @@ def identify_bos(tickerData, major_highs, major_lows):
                     break
     
     return bos_list
-
-
 def identify_demand_zones(tickerData, major_lows, candles_count, comparison_multiplier):
-    """Identify demand zones based on major lows and absolute differences, with customizable parameters for analysis."""
+    """Identify demand zones based on major lows and absolute differences, with customizable parameters for analysis,
+    ensuring no candle to the right has a low lower than the high of the demand zone candle."""
     demand_zones = []
     for low_pos in major_lows:
         # Ensure there are enough candles before and after the major low
@@ -82,20 +81,30 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
             pre_low = tickerData.iloc[low_pos - candles_count]['Low']
             # Get the 'Low' of the candle 'candles_count' positions after the major low
             post_low = tickerData.iloc[low_pos + candles_count]['Low']
+            # Get the 'High' of the demand zone candle (major low candle)
+            demand_zone_high = tickerData.iloc[low_pos]['High']
             major_low = tickerData.iloc[low_pos]['Low']
 
-            # Calculate the absolute differences instead of rates
+            # Calculate the absolute differences
             abs_diff_decline = abs(major_low - pre_low)
             abs_diff_increase = abs(post_low - major_low)
 
             # Log the absolute differences for analysis
             logging.info(f"Absolute difference of decline: {abs_diff_decline}, Absolute difference of increase: {abs_diff_increase}")
 
-            # Corrected comparison check:
-            # Demand zone is identified if the absolute increase is more than the absolute decline by a factor of the comparison_multiplier
+            # Check if the absolute increase is more than the absolute decline by a factor of the comparison_multiplier
             if abs_diff_increase > comparison_multiplier * abs_diff_decline:
-                demand_zones.append(low_pos)
-                logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
+                # Check for any candle to the right with a low lower than the low of the demand zone candle
+                invalid_zone = False
+                for i in range(low_pos + 1, len(tickerData)):
+                    if tickerData.iloc[i]['Low'] < major_low:
+                        invalid_zone = True
+                        logging.info(f"Candle to the right with lower low found at position {i}, invalidating demand zone at position {low_pos}. Demand zone low: {major_low}, Invalidating candle low: {tickerData.iloc[i]['Low']}")
+                        break
+
+                if not invalid_zone:
+                    demand_zones.append(low_pos)
+                    logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
 
     if not demand_zones:
         logging.info("No demand zones were identified.")
