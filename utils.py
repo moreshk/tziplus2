@@ -154,3 +154,38 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
     if not supply_zones:
         logging.info("No supply zones were identified.")
     return supply_zones
+
+
+# def identify_demand_zones(tickerData, major_lows, candles_count, comparison_multiplier):
+#     """Identify demand zones based on major lows and absolute differences, with customizable parameters for analysis,
+#     ensuring no major low to the right has a low lower than the high of the demand zone candle."""
+#     demand_zones = []
+#     for low_pos in major_lows:
+#         # Ensure there are enough candles before and after the major low
+#         if low_pos > candles_count - 1 and low_pos < len(tickerData) - candles_count:
+#             pre_low = tickerData.iloc[low_pos - candles_count]['Low']
+#             post_low = tickerData.iloc[low_pos + candles_count]['Low']
+#             demand_zone_high = tickerData.iloc[low_pos]['High']
+#             major_low = tickerData.iloc[low_pos]['Low']
+
+#             abs_diff_decline = abs(major_low - pre_low)
+#             abs_diff_increase = abs(post_low - major_low)
+
+#             logging.info(f"Absolute difference of decline: {abs_diff_decline}, Absolute difference of increase: {abs_diff_increase}")
+
+#             if abs_diff_increase > comparison_multiplier * abs_diff_decline:
+#                 invalid_zone = False
+#                 for i in major_lows:
+#                     if i > low_pos:
+#                         if tickerData.iloc[i]['Low'] < major_low:
+#                             invalid_zone = True
+#                             logging.info(f"Another major low to the right found at position {i}, invalidating demand zone at position {low_pos}. Demand zone low: {major_low}, Invalidating major low: {tickerData.iloc[i]['Low']}")
+#                             break
+
+#                 if not invalid_zone:
+#                     demand_zones.append(low_pos)
+#                     logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
+
+#     if not demand_zones:
+#         logging.info("No demand zones were identified.")
+#     return demand_zones

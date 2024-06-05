@@ -10,10 +10,10 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define the ticker symbol
-tickerSymbol = 'META'
+tickerSymbol = 'GOOG'
 
 # Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
-interval = '1h'  # Change this to your desired interval
+interval = '1d'  # Change this to your desired interval
 
 # Get today's date
 endDate = datetime.now()
@@ -32,17 +32,25 @@ data_folder = 'data'
 if not os.path.exists(data_folder):
     os.makedirs(data_folder)  # Create the data folder if it doesn't exist
 fileName = f"{data_folder}/{tickerSymbol}_data_{startDate.strftime('%Y%m%d')}_{endDate.strftime('%Y%m%d')}_{interval}.csv"
+
+
 # Check if data is already downloaded
 if os.path.exists(fileName):
     # Load data from CSV file
     tickerData = pd.read_csv(fileName, parse_dates=True, index_col=index_col_name)
+    # Convert index to UTC datetime objects if they are timezone-aware
+    if tickerData.index.tz is not None:
+        tickerData.index = tickerData.index.tz_convert('UTC')
+    else:
+        tickerData.index = pd.to_datetime(tickerData.index)
 else:
     # Download data if not already downloaded
     tickerData = yf.download(tickerSymbol, start=startDate, end=endDate, interval=interval)
     tickerData = tickerData.round(2)
+    # Ensure the index is in datetime format and convert to UTC if timezone-aware
+    tickerData.index = pd.to_datetime(tickerData.index, utc=True)
     # Save data to CSV file
     tickerData.to_csv(fileName)
-
 # Ensure the index is in datetime format
 tickerData.index = pd.to_datetime(tickerData.index)
 
