@@ -96,19 +96,32 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
             # logging.info(f"Absolute difference of decline: {abs_diff_decline}, Absolute difference of increase: {abs_diff_increase}")
 
             # Check if the absolute increase is more than the absolute decline by a factor of the comparison_multiplier
+            # if abs_diff_increase > comparison_multiplier * abs_diff_decline:
+            #     # Check for any candle to the right with a low lower than the low of the demand zone candle
+            #     invalid_zone = False
+            #     for i in range(low_pos + 1, len(tickerData)):
+            #         if tickerData.iloc[i]['Low'] < major_low:
+            #             invalid_zone = True
+            #             # logging.info(f"Candle to the right with lower low found at position {i}, invalidating demand zone at position {low_pos}. Demand zone low: {major_low}, Invalidating candle low: {tickerData.iloc[i]['Low']}")
+            #             break
+
+            #     if not invalid_zone:
+            #         demand_zones.append(low_pos)
+            #         # logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
+
+
             if abs_diff_increase > comparison_multiplier * abs_diff_decline:
-                # Check for any candle to the right with a low lower than the low of the demand zone candle
+                # Check for any candle to the right with a close lower than the close of the demand zone candle
                 invalid_zone = False
                 for i in range(low_pos + 1, len(tickerData)):
-                    if tickerData.iloc[i]['Low'] < major_low:
+                    if tickerData.iloc[i]['Close'] < tickerData.iloc[low_pos]['Close']:
                         invalid_zone = True
-                        # logging.info(f"Candle to the right with lower low found at position {i}, invalidating demand zone at position {low_pos}. Demand zone low: {major_low}, Invalidating candle low: {tickerData.iloc[i]['Low']}")
+                        # logging.info(f"Candle to the right with lower close found at position {i}, invalidating demand zone at position {low_pos}. Demand zone close: {tickerData.iloc[low_pos]['Close']}, Invalidating candle close: {tickerData.iloc[i]['Close']}")
                         break
 
                 if not invalid_zone:
                     demand_zones.append(low_pos)
                     # logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
-
     if not demand_zones:
         logging.info("No demand zones were identified.")
     return demand_zones
@@ -137,19 +150,34 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
             # Log the absolute differences for analysis
             # logging.info(f"Absolute difference of increase: {abs_diff_increase}, Absolute difference of decline: {abs_diff_decline}")
 
+            # # Check if the absolute decline is more than the absolute increase by a factor of the comparison_multiplier
+            # if abs_diff_decline > comparison_multiplier * abs_diff_increase:
+            #     # Check for any candle to the right with a high higher than the high of the supply zone candle
+            #     invalid_zone = False
+            #     for i in range(high_pos + 1, len(tickerData)):
+            #         if tickerData.iloc[i]['High'] > major_high:
+            #             invalid_zone = True
+            #             # logging.info(f"Candle to the right with higher high found at position {i}, invalidating supply zone at position {high_pos}. Supply zone high: {major_high}, Invalidating candle high: {tickerData.iloc[i]['High']}")
+            #             break
+
+            #     if not invalid_zone:
+            #         supply_zones.append(high_pos)
+            #         # logging.info(f"Supply zone identified at position {high_pos} with major high at {major_high}")
+
             # Check if the absolute decline is more than the absolute increase by a factor of the comparison_multiplier
             if abs_diff_decline > comparison_multiplier * abs_diff_increase:
-                # Check for any candle to the right with a high higher than the high of the supply zone candle
+                # Check for any candle to the right with a close higher than the close of the supply zone candle
                 invalid_zone = False
                 for i in range(high_pos + 1, len(tickerData)):
-                    if tickerData.iloc[i]['High'] > major_high:
+                    if tickerData.iloc[i]['Close'] > tickerData.iloc[high_pos]['Close']:
                         invalid_zone = True
-                        # logging.info(f"Candle to the right with higher high found at position {i}, invalidating supply zone at position {high_pos}. Supply zone high: {major_high}, Invalidating candle high: {tickerData.iloc[i]['High']}")
+                        # logging.info(f"Candle to the right with higher close found at position {i}, invalidating supply zone at position {high_pos}. Supply zone close: {tickerData.iloc[high_pos]['Close']}, Invalidating candle close: {tickerData.iloc[i]['Close']}")
                         break
 
                 if not invalid_zone:
                     supply_zones.append(high_pos)
                     # logging.info(f"Supply zone identified at position {high_pos} with major high at {major_high}")
+
 
     if not supply_zones:
         logging.info("No supply zones were identified.")
