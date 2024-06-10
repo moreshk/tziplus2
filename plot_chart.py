@@ -20,7 +20,7 @@ def find_nearest_date(index, target):
     return index[nearest_index]
 
 
-def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones, supply_zones):
+def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones, supply_zones, tickerSymbol):
     """Create a candlestick chart with colored candles, FVGs, and major highs/lows."""
     fig = go.Figure()
 
@@ -136,6 +136,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
     print("tickformat is:", tickformat)
 
     fig.update_layout(
+        title=f"Ticker: {tickerSymbol}",  # Add
         yaxis_title='Price',
         xaxis_title='Date',
         xaxis=dict(
