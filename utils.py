@@ -107,7 +107,7 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
 
                 if not invalid_zone:
                     demand_zones.append(low_pos)
-                    logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
+                    # logging.info(f"Demand zone identified at position {low_pos} with major low at {major_low}")
 
     if not demand_zones:
         logging.info("No demand zones were identified.")
@@ -149,7 +149,7 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
 
                 if not invalid_zone:
                     supply_zones.append(high_pos)
-                    logging.info(f"Supply zone identified at position {high_pos} with major high at {major_high}")
+                    # logging.info(f"Supply zone identified at position {high_pos} with major high at {major_high}")
 
     if not supply_zones:
         logging.info("No supply zones were identified.")

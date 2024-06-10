@@ -93,14 +93,14 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
             y0 = tickerData.iloc[zone_pos]['Low']  # Bottom of the rectangle
             y1 = tickerData.iloc[zone_pos]['High']  # Top of the rectangle, changed from y0 to represent the high of the candle
 
-            logging.info(f"Attempting to add demand zone to chart: Start={x0}, End={x1}, Low={y0}, High={y1}")
+            # logging.info(f"Attempting to add demand zone to chart: Start={x0}, End={x1}, Low={y0}, High={y1}")
 
             fig.add_shape(type="rect",
                         x0=x0, x1=x1,
                         y0=y0, y1=y1,
                         fillcolor="blue", opacity=0.3, line_width=0)
-        else:
-            logging.info(f"Demand zone at position {zone_pos} not added - latest close price not above major low.")
+        # else:
+            # logging.info(f"Demand zone at position {zone_pos} not added - latest close price not above major low.")
 
 
 
@@ -112,14 +112,14 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
             y0 = tickerData.iloc[zone_pos]['Low']  # Bottom of the rectangle
             y1 = tickerData.iloc[zone_pos]['High']  # Top of the rectangle
 
-            logging.info(f"Adding supply zone to chart: Start={x0}, End={x1}, Low={y0}, High={y1}")
+            # logging.info(f"Adding supply zone to chart: Start={x0}, End={x1}, Low={y0}, High={y1}")
 
             fig.add_shape(type="rect",
                         x0=x0, x1=x1,
                         y0=y0, y1=y1,
                         fillcolor="black", opacity=0.3, line_width=0)
-        else:
-            logging.info(f"Supply zone at position {zone_pos} not added - latest close price not below major high.")
+        # else:
+            # logging.info(f"Supply zone at position {zone_pos} not added - latest close price not below major high.")
     # Determine the interval of the data
     data_interval = tickerData.index[1] - tickerData.index[0]
 
