@@ -24,14 +24,7 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
     """Create a candlestick chart with colored candles, FVGs, major highs/lows, and volume."""
     fig = go.Figure()
 
-    fig.add_trace(go.Candlestick(x=tickerData.index,
-                                 open=tickerData['Open'],
-                                 high=tickerData['High'],
-                                 low=tickerData['Low'],
-                                 close=tickerData['Close'],
-                                 increasing_line_color='blue',   
-                                 decreasing_line_color='black',
-                                 name='Price'))
+    
 
     # Scale volume data to 50% of the chart height
     max_volume = tickerData['Volume'].max()
@@ -44,6 +37,15 @@ def plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_z
                          marker_color='lightgrey',
                          opacity=0.6, 
                          yaxis='y2'))
+    
+    fig.add_trace(go.Candlestick(x=tickerData.index,
+                                 open=tickerData['Open'],
+                                 high=tickerData['High'],
+                                 low=tickerData['Low'],
+                                 close=tickerData['Close'],
+                                 increasing_line_color='blue',   
+                                 decreasing_line_color='black',
+                                 name='Price'))
 
     # Modify FVGs to the chart based on position
     for fvg in fvg_list:
