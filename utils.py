@@ -90,6 +90,20 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
                 logging.info(f"Skipping non-boring candle at position {low_pos}: {candle.to_dict()}")
                 continue  # Skip this major low if it is not a boring candle
 
+            # Check if at least one of the next three candles is a bullish exciting candle
+            has_bullish_exciting_candle = False
+            for i in range(1, 4):
+                if low_pos + i < len(tickerData):
+                    next_candle = tickerData.iloc[low_pos + i]
+                    is_exciting, candle_type = is_exciting_candle(next_candle, average_body_size, average_volume)
+                    if is_exciting and candle_type == 'Bullish':
+                        has_bullish_exciting_candle = True
+                        break
+
+            if not has_bullish_exciting_candle:
+                logging.info(f"No bullish exciting candle found in the next three candles after position {low_pos}")
+                continue  # Skip this major low if no bullish exciting candle is found
+
             logging.debug(f"Processing major low at position {low_pos}: {candle.to_dict()}")
             # Get the 'Low' of the candle 'candles_count' positions before the major low
             pre_low = tickerData.iloc[low_pos - candles_count]['Low']
@@ -208,3 +222,44 @@ def is_boring_candle(candle, average_body_size, average_volume):
                  f"Volume: {candle['Volume']}, Is boring: {is_boring}")
 
     return is_boring
+
+def is_exciting_candle(candle, average_body_size, average_volume):
+    """Identify if a particular candle is an exciting candle and its type (bullish or bearish).
+    
+    An exciting candle has:
+    - Volume higher than the average volume
+    - Body size at least 1.5 times the average body size
+    - Body size at least 2 times the total wicks (upper shadow + lower shadow)
+    
+    Returns:
+    - is_exciting (bool): Whether the candle is exciting
+    - type (str): 'Bullish' if the candle is bullish exciting, 'Bearish' if the candle is bearish exciting, 
+                  'None' if the candle is not exciting
+    """
+    body_size = abs(candle['Open'] - candle['Close'])
+    lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
+    upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
+    total_wick = lower_shadow + upper_shadow
+
+    is_volume_exciting = candle['Volume'] > average_volume
+    is_body_size_exciting = body_size >= average_body_size
+    is_body_size_greater_than_wick = body_size >= total_wick
+
+    is_exciting = is_volume_exciting and is_body_size_exciting and is_body_size_greater_than_wick
+
+    if is_exciting:
+        if candle['Close'] > candle['Open']:
+            candle_type = 'Bullish'
+        else:
+            candle_type = 'Bearish'
+    else:
+        candle_type = 'None'
+
+    logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
+                 f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
+                 f"Average body size: {average_body_size}, Average volume: {average_volume}, "
+                 f"Volume: {candle['Volume']}, Is volume exciting: {is_volume_exciting}, "
+                 f"Is body size exciting: {is_body_size_exciting}, Is body size greater than wick: {is_body_size_greater_than_wick}, "
+                 f"Is exciting: {is_exciting}, Type: {candle_type}")
+
+    return is_exciting, candle_type
