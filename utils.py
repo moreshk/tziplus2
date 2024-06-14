@@ -121,7 +121,7 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
                 # Check for any candle to the right with a close lower than the close of the demand zone candle
                 invalid_zone = False
                 for i in range(low_pos + 1, len(tickerData)):
-                    if tickerData.iloc[i]['Close'] < candle['Close']:
+                    if tickerData.iloc[i]['Close'] < candle['High']:
                         invalid_zone = True
                         break
 
@@ -134,6 +134,7 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
     if not demand_zones:
         logging.info("No demand zones were identified.")
     return demand_zones
+
 
 def identify_supply_zones(tickerData, major_highs, candles_count, comparison_multiplier):
     """Identify supply zones based on major highs and absolute differences, with customizable parameters for analysis,
@@ -154,6 +155,20 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
                 logging.info(f"Skipping non-boring candle at position {high_pos}: {candle.to_dict()}")
                 continue  # Skip this major high if it is not a boring candle
 
+            # Check if at least one of the next three candles is a bearish exciting candle
+            has_bearish_exciting_candle = False
+            for i in range(1, 4):
+                if high_pos + i < len(tickerData):
+                    next_candle = tickerData.iloc[high_pos + i]
+                    is_exciting, candle_type = is_exciting_candle(next_candle, average_body_size, average_volume)
+                    if is_exciting and candle_type == 'Bearish':
+                        has_bearish_exciting_candle = True
+                        break
+
+            if not has_bearish_exciting_candle:
+                logging.info(f"No bearish exciting candle found in the next three candles after position {high_pos}")
+                continue  # Skip this major high if no bearish exciting candle is found
+
             logging.debug(f"Processing major high at position {high_pos}: {candle.to_dict()}")
             # Get the 'High' of the candle 'candles_count' positions before the major high
             pre_high = tickerData.iloc[high_pos - candles_count]['High']
@@ -169,10 +184,10 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
 
             # Check if the absolute decline is more than the absolute increase by a factor of the comparison_multiplier
             if abs_diff_decline > comparison_multiplier * abs_diff_increase:
-                # Check for any candle to the right with a close higher than the close of the supply zone candle
+                # Check for any candle to the right with a close higher than the high of the supply zone candle
                 invalid_zone = False
                 for i in range(high_pos + 1, len(tickerData)):
-                    if tickerData.iloc[i]['Close'] > candle['Close']:
+                    if tickerData.iloc[i]['Close'] > candle['Low']:
                         invalid_zone = True
                         break
 

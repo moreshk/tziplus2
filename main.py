@@ -26,7 +26,7 @@ interval = '15m'  # Change this to your desired interval
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=7)  # change to your desired period
+startDate = endDate - timedelta(days=14)  # change to your desired period
 
 # Before reading the CSV file, determine the correct index column name
 if interval == '1d':
