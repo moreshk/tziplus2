@@ -121,3 +121,5 @@ tziplus2/
 *.csv
 
 data/
+
+.DS_Store
