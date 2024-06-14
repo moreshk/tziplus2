@@ -148,3 +148,14 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
         logging.info("No supply zones were identified.")
     return supply_zones
 
+def calculate_average_body_size(tickerData):
+    """Calculate the average body size of the candles (absolute of open minus close)."""
+    valid_data = tickerData.dropna(subset=['Open', 'Close'])
+    average_body_size = (valid_data['Open'] - valid_data['Close']).abs().mean()
+    return average_body_size
+
+def calculate_average_volume(tickerData):
+    """Calculate the average volume of the candles."""
+    valid_data = tickerData.dropna(subset=['Volume'])
+    average_volume = valid_data['Volume'].mean()
+    return average_volume
