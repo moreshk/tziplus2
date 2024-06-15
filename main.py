@@ -108,7 +108,7 @@ for tickerSymbol in tickerSymbols:
     if close_to_demand or close_to_supply:
         logging.info(f"{tickerSymbol}: Close price is close to a demand or supply zone.")
         # Update the plot_chart function call to include the ticker symbol
-        plot_chart(tickerData, fvg_list, major_highs, major_lows, bos_list, demand_zones, supply_zones, tickerSymbol)
+        plot_chart(tickerData, fvg_list, demand_zones, supply_zones, tickerSymbol)
     else:
         logging.info(f"{tickerSymbol}: Close price is not close to any demand or supply zone.")
 
