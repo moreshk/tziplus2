@@ -92,7 +92,7 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
 
             # Check if at least one of the next three candles is a bullish exciting candle
             has_bullish_exciting_candle = False
-            for i in range(1, 4):
+            for i in range(1, 6):
                 if low_pos + i < len(tickerData):
                     next_candle = tickerData.iloc[low_pos + i]
                     is_exciting, candle_type = is_exciting_candle(next_candle, average_body_size, average_volume)
@@ -157,7 +157,7 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
 
             # Check if at least one of the next three candles is a bearish exciting candle
             has_bearish_exciting_candle = False
-            for i in range(1, 4):
+            for i in range(1, 6):
                 if high_pos + i < len(tickerData):
                     next_candle = tickerData.iloc[high_pos + i]
                     is_exciting, candle_type = is_exciting_candle(next_candle, average_body_size, average_volume)
@@ -228,8 +228,8 @@ def is_boring_candle(candle, average_body_size, average_volume):
     total_wick = lower_shadow + upper_shadow
 
     is_boring = (body_size < average_body_size and
-                 candle['Volume'] < average_volume and
-                 body_size < total_wick)
+                #  candle['Volume'] < average_volume and
+                 body_size <= 0.75 * total_wick)
 
     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
                  f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "

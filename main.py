@@ -20,13 +20,13 @@ tickerSymbols = [
 ]
 
 # Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
-interval = '15m'  # Change this to your desired interval
+interval = '1d'  # Change this to your desired interval
 
 # Get today's date
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=14)  # change to your desired period
+startDate = endDate - timedelta(days=180)  # change to your desired period
 
 # Before reading the CSV file, determine the correct index column name
 if interval == '1d':
@@ -98,7 +98,7 @@ for tickerSymbol in tickerSymbols:
 
 
     # Define the tolerance level (e.g., 0.01 for 1%)
-    tolerance = 0.005
+    tolerance = 0.1
 
     # Check if the close price of the last candle is close to either the demand or supply zone areas
     last_close = tickerData.iloc[-1]['Close']
