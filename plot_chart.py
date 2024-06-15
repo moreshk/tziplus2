@@ -59,36 +59,7 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, tickerSymbol):
                       y0=y0, y1=y1,
                       fillcolor=color, opacity=0.3, line_width=2)
 
-    # # Modify major highs to the chart to extend only to the right
-    # for high_pos in major_highs:
-    #     y_high = tickerData.iloc[high_pos]['High']
-    #     x_high_date = tickerData.index[high_pos]  # Get the date/index of the high
-        
-    #     fig.add_shape(type="line",
-    #                   x0=x_high_date, x1=tickerData.index[-1],  # Start from the high and extend to the end
-    #                   y0=y_high, y1=y_high,
-    #                   line=dict(color="green", width=1, dash="dash"))
-
-    # # Modify major lows to the chart to extend only to the right
-    # for low_pos in major_lows:
-    #     y_low = tickerData.iloc[low_pos]['Low']
-    #     x_low_date = tickerData.index[low_pos]  # Get the date/index of the low
-        
-    #     fig.add_shape(type="line",
-    #                   x0=x_low_date, x1=tickerData.index[-1],  # Start from the low and extend to the end
-    #                   y0=y_low, y1=y_low,
-    #                   line=dict(color="black", width=1, dash="dot"))
-
-    # # Modify BoS to the chart based on position
-    # for bos in bos_list:
-    #     bos_pos, bos_type = bos
-    #     y_bos = tickerData.iloc[bos_pos]['Close']
-    #     color = 'blue' if bos_type == 'Bullish' else 'red'
-        
-    #     fig.add_shape(type="line",
-    #                   x0=tickerData.index[bos_pos], x1=tickerData.index[bos_pos],
-    #                   y0=tickerData['Low'].min(), y1=tickerData['High'].max(),
-    #                   line=dict(color=color, width=2, dash="dot"))
+    
 
     # Add demand zones to the chart
     for zone_pos in demand_zones:
