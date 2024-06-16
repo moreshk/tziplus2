@@ -20,13 +20,13 @@ tickerSymbols = [
 ]
 
 # Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
-interval = '1h'  # Change this to your desired interval
+interval = '1d'  # Change this to your desired interval
 
 # Get today's date
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=14)  # change to your desired period
+startDate = endDate - timedelta(days=180)  # change to your desired period
 
 # Before reading the CSV file, determine the correct index column name
 if interval == '1d':
@@ -62,9 +62,6 @@ for tickerSymbol in tickerSymbols:
     # Ensure the index is in datetime format
     tickerData.index = pd.to_datetime(tickerData.index)
 
-    # Print the dates in tickerData
-    # logging.info(f"Dates in tickerData: {tickerData.index}")
-
     # Convert the dates into string format without time
     tickerData['Date'] = tickerData.index.strftime('%Y-%m-%d %H:%M:%S' if interval != '1d' else '%Y-%m-%d')
 
@@ -96,19 +93,9 @@ for tickerSymbol in tickerSymbols:
     # Identify supply zones
     supply_zones = identify_supply_zones(tickerData, major_highs, 10, 1.1)  # Adjust parameters as needed
 
-
-    # Define the tolerance level (e.g., 0.01 for 1%)
-    tolerance = 0.05
-
-    # Check if the close price of the last candle is close to either the demand or supply zone areas
-    last_close = tickerData.iloc[-1]['Close']
-    close_to_demand = any(last_close <= tickerData.iloc[zone]['High'] * (1 + tolerance) for zone in demand_zones)
-    close_to_supply = any(last_close >= tickerData.iloc[zone]['Low'] * (1 - tolerance) for zone in supply_zones)
-
-    if close_to_demand or close_to_supply:
-        logging.info(f"{tickerSymbol}: Close price is close to a demand or supply zone.")
-        # Update the plot_chart function call to include the ticker symbol
-        plot_chart(tickerData, fvg_list, demand_zones, supply_zones, tickerSymbol)
+    # Check if there are any demand and supply zones
+    if demand_zones and supply_zones:
+        logging.info(f"{tickerSymbol}: Both demand and supply zones are identified.")
+        plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, major_lows, tickerSymbol)
     else:
-        logging.info(f"{tickerSymbol}: Close price is not close to any demand or supply zone.")
-
+        logging.info(f"{tickerSymbol}: Either demand or supply zones are not identified.")

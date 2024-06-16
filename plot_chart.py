@@ -20,7 +20,7 @@ def find_nearest_date(index, target):
     return index[nearest_index]
 
 
-def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, tickerSymbol):
+def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, major_lows, tickerSymbol):
     """Create a candlestick chart with colored candles, FVGs, major highs/lows, and volume."""
     fig = go.Figure()
 
@@ -86,6 +86,23 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, tickerSymbol):
                         x0=x0, x1=x1,
                         y0=y0, y1=y1,
                         fillcolor="black", opacity=0.3, line_width=0)
+            
+    
+     # Add horizontal dashed lines for major highs and lows
+    for high in major_highs:
+        fig.add_shape(type="line",
+                      x0=tickerData.index[high], x1=tickerData.index[-1],
+                      y0=tickerData.iloc[high]['High'], y1=tickerData.iloc[high]['High'],
+                      line=dict(color="blue", width=2, dash="dash"),
+                      opacity=0.1)
+
+    for low in major_lows:
+        fig.add_shape(type="line",
+                      x0=tickerData.index[low], x1=tickerData.index[-1],
+                      y0=tickerData.iloc[low]['Low'], y1=tickerData.iloc[low]['Low'],
+                      line=dict(color="black", width=2, dash="dash"),
+                      opacity=0.1)
+
 
     # Determine the interval of the data
     data_interval = tickerData.index[1] - tickerData.index[0]
