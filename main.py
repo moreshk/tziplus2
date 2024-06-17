@@ -9,15 +9,17 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+tickerSymbols = ['APOLLOHOSP.NS']
+
 # List of ticker symbols
-tickerSymbols = [
-    'POWERGRID.NS', 'ULTRACEMCO.NS', 'HEROMOTOCO.NS', 'GRASIM.NS', 'CIPLA.NS', 'NTPC.NS', 'NESTLEIND.NS', 'AXISBANK.NS',
-    'TATASTEEL.NS', 'BRITANNIA.NS', 'LT.NS', 'ADANIPORTS.NS', 'BAJAJFINSV.NS', 'DIVISLAB.NS', 'SBIN.NS', 'HDFCLIFE.NS',
-    'RELIANCE.NS', 'DRREDDY.NS', 'COALINDIA.NS', 'BPCL.NS', 'EICHERMOT.NS', 'ADANIENT.NS', 'BAJAJ-AUTO.NS', 'BHARTIARTL.NS',
-    'TATAMOTORS.NS', 'APOLLOHOSP.NS', 'SHRIRAMFIN.NS', 'SUNPHARMA.NS', 'TATACONSUM.NS', 'SBILIFE.NS', 'ONGC.NS', 'ICICIBANK.NS',
-    'HINDALCO.NS', 'INDUSINDBK.NS', 'ASIANPAINT.NS', 'KOTAKBANK.NS', 'ITC.NS', 'BAJFINANCE.NS', 'MARUTI.NS', 'HDFCBANK.NS',
-    'HINDUNILVR.NS', 'JSWSTEEL.NS', 'M&M.NS', 'TITAN.NS', 'TCS.NS', 'WIPRO.NS', 'HCLTECH.NS', 'LTIM.NS', 'INFY.NS', 'TECHM.NS'
-]
+# tickerSymbols = [
+#     'POWERGRID.NS', 'ULTRACEMCO.NS', 'HEROMOTOCO.NS', 'GRASIM.NS', 'CIPLA.NS', 'NTPC.NS', 'NESTLEIND.NS', 'AXISBANK.NS',
+#     'TATASTEEL.NS', 'BRITANNIA.NS', 'LT.NS', 'ADANIPORTS.NS', 'BAJAJFINSV.NS', 'DIVISLAB.NS', 'SBIN.NS', 'HDFCLIFE.NS',
+#     'RELIANCE.NS', 'DRREDDY.NS', 'COALINDIA.NS', 'BPCL.NS', 'EICHERMOT.NS', 'ADANIENT.NS', 'BAJAJ-AUTO.NS', 'BHARTIARTL.NS',
+#     'TATAMOTORS.NS', 'APOLLOHOSP.NS', 'SHRIRAMFIN.NS', 'SUNPHARMA.NS', 'TATACONSUM.NS', 'SBILIFE.NS', 'ONGC.NS', 'ICICIBANK.NS',
+#     'HINDALCO.NS', 'INDUSINDBK.NS', 'ASIANPAINT.NS', 'KOTAKBANK.NS', 'ITC.NS', 'BAJFINANCE.NS', 'MARUTI.NS', 'HDFCBANK.NS',
+#     'HINDUNILVR.NS', 'JSWSTEEL.NS', 'M&M.NS', 'TITAN.NS', 'TCS.NS', 'WIPRO.NS', 'HCLTECH.NS', 'LTIM.NS', 'INFY.NS', 'TECHM.NS'
+# ]
 
 # Define the interval (e.g., '1d' for daily, '1h' for hourly, '30m' for 30 minutes)
 interval = '1d'  # Change this to your desired interval
@@ -26,7 +28,7 @@ interval = '1d'  # Change this to your desired interval
 endDate = datetime.now()
 
 # Get the data for the desired period
-startDate = endDate - timedelta(days=180)  # change to your desired period
+startDate = endDate - timedelta(days=210)  # change to your desired period
 
 # Before reading the CSV file, determine the correct index column name
 if interval == '1d':
@@ -94,7 +96,7 @@ for tickerSymbol in tickerSymbols:
     supply_zones = identify_supply_zones(tickerData, major_highs, 10, 1.1)  # Adjust parameters as needed
 
     # Check if there are any demand and supply zones
-    if demand_zones and supply_zones:
+    if demand_zones or supply_zones:
         logging.info(f"{tickerSymbol}: Both demand and supply zones are identified.")
         plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, major_lows, tickerSymbol)
     else:

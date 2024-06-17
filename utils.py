@@ -248,29 +248,95 @@ def calculate_average_volume(tickerData):
     return average_volume
 
 
+# def is_boring_candle(candle, average_body_size, average_volume):
+#     """Identify if a particular candle is a boring candle.
+    
+#     A boring candle has:
+#     - Body size lower than the average body size
+#     - Volume lower than the average volume
+#     - Body size lower than its total wick (upper shadow + lower shadow)
+#     """
+#     body_size = abs(candle['Open'] - candle['Close'])
+#     lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
+#     upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
+#     total_wick = lower_shadow + upper_shadow
+
+#     is_boring = (body_size < average_body_size and
+#                 #  candle['Volume'] < average_volume and
+#                  body_size <= 0.5 * total_wick)
+
+#     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
+#                  f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
+#                  f"Average body size: {average_body_size}, Average volume: {average_volume}, "
+#                  f"Volume: {candle['Volume']}, Is boring: {is_boring}")
+
+#     return is_boring
+
+
 def is_boring_candle(candle, average_body_size, average_volume):
     """Identify if a particular candle is a boring candle.
     
     A boring candle has:
     - Body size lower than the average body size
     - Volume lower than the average volume
-    - Body size lower than its total wick (upper shadow + lower shadow)
+    - Body size lower than half of the absolute difference between high and low
     """
     body_size = abs(candle['Open'] - candle['Close'])
-    lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
-    upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
-    total_wick = lower_shadow + upper_shadow
+    high_low_diff = abs(candle['High'] - candle['Low'])
 
-    is_boring = (body_size < average_body_size and
-                #  candle['Volume'] < average_volume and
-                 body_size <= 0.5 * total_wick)
+    # is_boring = (body_size < average_body_size and
+    #              body_size <= 0.5 * high_low_diff)
+    
+    is_boring = (body_size <= 0.5 * high_low_diff)
 
     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
-                 f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
+                 f"High-Low difference: {high_low_diff}, "
                  f"Average body size: {average_body_size}, Average volume: {average_volume}, "
                  f"Volume: {candle['Volume']}, Is boring: {is_boring}")
 
     return is_boring
+
+# def is_exciting_candle(candle, average_body_size, average_volume):
+#     """Identify if a particular candle is an exciting candle and its type (bullish or bearish).
+    
+#     An exciting candle has:
+#     - Volume higher than the average volume
+#     - Body size at least 1.5 times the average body size
+#     - Body size at least 2 times the total wicks (upper shadow + lower shadow)
+    
+#     Returns:
+#     - is_exciting (bool): Whether the candle is exciting
+#     - type (str): 'Bullish' if the candle is bullish exciting, 'Bearish' if the candle is bearish exciting, 
+#                   'None' if the candle is not exciting
+#     """
+#     body_size = abs(candle['Open'] - candle['Close'])
+#     lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
+#     upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
+#     total_wick = lower_shadow + upper_shadow
+
+#     is_volume_exciting = candle['Volume'] > average_volume
+#     is_body_size_exciting = body_size >= average_body_size
+#     is_body_size_greater_than_wick = body_size >= total_wick
+
+#     is_exciting = is_volume_exciting and is_body_size_exciting and is_body_size_greater_than_wick
+
+#     if is_exciting:
+#         if candle['Close'] > candle['Open']:
+#             candle_type = 'Bullish'
+#         else:
+#             candle_type = 'Bearish'
+#     else:
+#         candle_type = 'None'
+
+#     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
+#                  f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
+#                  f"Average body size: {average_body_size}, Average volume: {average_volume}, "
+#                  f"Volume: {candle['Volume']}, Is volume exciting: {is_volume_exciting}, "
+#                  f"Is body size exciting: {is_body_size_exciting}, Is body size greater than wick: {is_body_size_greater_than_wick}, "
+#                  f"Is exciting: {is_exciting}, Type: {candle_type}")
+
+#     return is_exciting, candle_type
+
 
 def is_exciting_candle(candle, average_body_size, average_volume):
     """Identify if a particular candle is an exciting candle and its type (bullish or bearish).
@@ -278,7 +344,7 @@ def is_exciting_candle(candle, average_body_size, average_volume):
     An exciting candle has:
     - Volume higher than the average volume
     - Body size at least 1.5 times the average body size
-    - Body size at least 2 times the total wicks (upper shadow + lower shadow)
+    - Body size at least 50% of the absolute difference between high and low
     
     Returns:
     - is_exciting (bool): Whether the candle is exciting
@@ -286,15 +352,15 @@ def is_exciting_candle(candle, average_body_size, average_volume):
                   'None' if the candle is not exciting
     """
     body_size = abs(candle['Open'] - candle['Close'])
-    lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
-    upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
-    total_wick = lower_shadow + upper_shadow
+    high_low_diff = abs(candle['High'] - candle['Low'])
 
     is_volume_exciting = candle['Volume'] > average_volume
-    is_body_size_exciting = body_size >= average_body_size
-    is_body_size_greater_than_wick = body_size >= total_wick
+    is_body_size_exciting = body_size >= 1.5 * average_body_size
+    is_body_size_greater_than_half_diff = (body_size >= 0.5 * high_low_diff)
 
-    is_exciting = is_volume_exciting and is_body_size_exciting and is_body_size_greater_than_wick
+    # is_exciting = is_volume_exciting and is_body_size_exciting and is_body_size_greater_than_half_diff
+
+    is_exciting = is_body_size_greater_than_half_diff
 
     if is_exciting:
         if candle['Close'] > candle['Open']:
@@ -305,10 +371,10 @@ def is_exciting_candle(candle, average_body_size, average_volume):
         candle_type = 'None'
 
     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
-                 f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
+                 f"High-Low difference: {high_low_diff}, "
                  f"Average body size: {average_body_size}, Average volume: {average_volume}, "
                  f"Volume: {candle['Volume']}, Is volume exciting: {is_volume_exciting}, "
-                 f"Is body size exciting: {is_body_size_exciting}, Is body size greater than wick: {is_body_size_greater_than_wick}, "
+                 f"Is body size exciting: {is_body_size_exciting}, Is body size greater than half of high-low difference: {is_body_size_greater_than_half_diff}, "
                  f"Is exciting: {is_exciting}, Type: {candle_type}")
 
     return is_exciting, candle_type
