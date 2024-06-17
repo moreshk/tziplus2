@@ -320,3 +320,43 @@ def is_exciting_candle(candle, average_body_size, average_volume):
                  f"Is exciting: {is_exciting}, Type: {candle_type}")
 
     return is_exciting, candle_type
+
+def identify_trend(tickerData, major_highs, major_lows):
+    """Identify the trend based on major highs and lows.
+    
+    Args:
+        tickerData (pd.DataFrame): The ticker data.
+        major_highs (list): List of indices of major highs.
+        major_lows (list): List of indices of major lows.
+        
+    Returns:
+        list: A list of trends ('up', 'down', 'side') for each candle.
+    """
+    trends = ['side'] * len(tickerData)  # Initialize all trends as 'side'
+    all_points = sorted(major_highs + major_lows)  # Combine and sort major highs and lows
+
+    for i in range(1, len(all_points)):
+        start = all_points[i - 1]
+        end = all_points[i]
+        if start in major_lows and end in major_highs:
+            trend = 'up'
+        elif start in major_highs and end in major_lows:
+            trend = 'down'
+        else:
+            trend = 'side'
+        
+        for j in range(start, end):
+            trends[j] = trend
+
+    # Handle the segment from the last major high or low to the latest candle
+    if all_points:
+        last_point = all_points[-1]
+        for i in range(last_point, len(tickerData)):
+            if tickerData.iloc[i]['Close'] > tickerData.iloc[last_point]['Close']:
+                trends[i] = 'up'
+            elif tickerData.iloc[i]['Close'] < tickerData.iloc[last_point]['Close']:
+                trends[i] = 'down'
+            else:
+                trends[i] = 'side'
+
+    return trends

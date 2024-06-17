@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 import logging
 import pandas as pd
 import numpy as np  # Ensure NumPy is imported
-from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume
+from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume, identify_trend
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,9 +19,11 @@ def find_nearest_date(index, target):
     # Calculate the absolute difference between the target and each datetime in the index, then find the index of the minimum difference
     nearest_index = np.abs(index - target).argmin()
     return index[nearest_index]
+from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume, identify_trend
+from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume, identify_trend
 
 def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, major_lows, tickerSymbol):
-    """Create a candlestick chart with colored candles, FVGs, major highs/lows, and volume."""
+    """Create a candlestick chart with colored candles, FVGs, major highs/lows, volume, and trend arrows."""
     fig = go.Figure()
 
     # Calculate average body size and volume for boring and exciting candle detection
@@ -90,6 +92,24 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                 hoverinfo='skip'
             ))
 
+    # Identify trends based on major highs and lows
+    trends = identify_trend(tickerData, major_highs, major_lows)
+    for i, trend in enumerate(trends):
+        arrow_symbol = 'triangle-up' if trend == 'up' else 'triangle-down' if trend == 'down' else 'triangle-right'
+        fig.add_trace(go.Scatter(
+            x=[tickerData.index[i]],
+            y=[tickerData['Low'].min() * 0.95],  # Position the arrow slightly below the lowest low
+            mode='markers',
+            marker=dict(
+                symbol=arrow_symbol,
+                size=10,
+                color='blue'
+            ),
+            name='Trend',
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+
     # Modify FVGs to the chart based on position
     for fvg in fvg_list:
         start_pos, end_pos, fvg_type = fvg  # Use positions instead of dates
@@ -133,7 +153,7 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
         fig.add_shape(type="line",
                       x0=tickerData.index[high], x1=tickerData.index[-1],
                       y0=tickerData.iloc[high]['High'], y1=tickerData.iloc[high]['High'],
-                                            line=dict(color="blue", width=2, dash="dash"),
+                      line=dict(color="blue", width=2, dash="dash"),
                       opacity=0.1)
 
     for low in major_lows:
