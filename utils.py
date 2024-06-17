@@ -71,6 +71,7 @@ def identify_bos(tickerData, major_highs, major_lows):
     
     return bos_list
 
+
 def identify_demand_zones(tickerData, major_lows, candles_count, comparison_multiplier):
     """Identify demand zones based on major lows and absolute differences, with customizable parameters for analysis,
     ensuring no candle to the right has a low lower than the high of the demand zone candle."""
@@ -95,8 +96,9 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
                     logging.info(f"Skipping non-boring candle at position {current_pos}: {candle.to_dict()}")
                     continue  # Skip this major low if it is not a boring candle
 
-                # Check if at least one of the next few candles is a bullish exciting candle or a bullish FVG
                 has_bullish_signal = False
+
+                # Check if at least one of the next few candles is a bullish exciting candle or a bullish FVG
                 for i in range(1, 6):
                     if current_pos + i < len(tickerData):
                         next_candle = tickerData.iloc[current_pos + i]
@@ -113,9 +115,19 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
                             has_bullish_signal = True
                             break
 
-                if not has_bullish_signal:
-                    logging.info(f"No bullish signal found in the next few candles after position {current_pos}")
-                    continue  # Skip this major low if no bullish signal is found
+                # Compulsory check for an exciting candle in the couple of candles to the immediate left
+                has_exciting_left = False
+                for i in range(1, 3):
+                    if current_pos - i >= 0:
+                        prev_candle = tickerData.iloc[current_pos - i]
+                        is_exciting, _ = is_exciting_candle(prev_candle, average_body_size, average_volume)
+                        if is_exciting:
+                            has_exciting_left = True
+                            break
+
+                if not has_bullish_signal or not has_exciting_left:
+                    logging.info(f"No valid signal found around position {current_pos}")
+                    continue  # Skip this major low if no valid signal is found
 
                 logging.debug(f"Processing major low at position {current_pos}: {candle.to_dict()}")
                 # Get the 'Low' of the candle 'candles_count' positions before the major low
@@ -145,8 +157,6 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
         logging.info("No demand zones were identified.")
     return demand_zones
 
-
-
 def identify_supply_zones(tickerData, major_highs, candles_count, comparison_multiplier):
     """Identify supply zones based on major highs and absolute differences, with customizable parameters for analysis,
     ensuring no candle to the right has a high higher than the low of the supply zone candle."""
@@ -171,8 +181,9 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
                     logging.info(f"Skipping non-boring candle at position {current_pos}: {candle.to_dict()}")
                     continue  # Skip this major high if it is not a boring candle
 
-                # Check if at least one of the next few candles is a bearish exciting candle or a bearish FVG
                 has_bearish_signal = False
+
+                # Check if at least one of the next few candles is a bearish exciting candle or a bearish FVG
                 for i in range(1, 6):
                     if current_pos + i < len(tickerData):
                         next_candle = tickerData.iloc[current_pos + i]
@@ -189,9 +200,19 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
                             has_bearish_signal = True
                             break
 
-                if not has_bearish_signal:
-                    logging.info(f"No bearish signal found in the next few candles after position {current_pos}")
-                    continue  # Skip this major high if no bearish signal is found
+                # Compulsory check for an exciting candle in the couple of candles to the immediate left
+                has_exciting_left = False
+                for i in range(1, 3):
+                    if current_pos - i >= 0:
+                        prev_candle = tickerData.iloc[current_pos - i]
+                        is_exciting, _ = is_exciting_candle(prev_candle, average_body_size, average_volume)
+                        if is_exciting:
+                            has_exciting_left = True
+                            break
+
+                if not has_bearish_signal or not has_exciting_left:
+                    logging.info(f"No valid signal found around position {current_pos}")
+                    continue  # Skip this major high if no valid signal is found
 
                 logging.debug(f"Processing major high at position {current_pos}: {candle.to_dict()}")
                 # Get the 'High' of the candle 'candles_count' positions before the major high
@@ -219,7 +240,6 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
     if not supply_zones:
         logging.info("No supply zones were identified.")
     return supply_zones
-
 
 def calculate_average_body_size(tickerData):
     """Calculate the average body size of the candles (absolute of open minus close)."""
