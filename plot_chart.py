@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 import logging
 import pandas as pd
 import numpy as np  # Ensure NumPy is imported
-from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume, identify_trend
+from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume, identify_trend, find_closest_zones, calculate_split_lines
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -133,7 +133,7 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
             fig.add_shape(type="rect",
                         x0=x0, x1=x1,
                         y0=y0, y1=y1,
-                        fillcolor="blue", opacity=0.3, line_width=0)
+                             fillcolor="blue", opacity=0.3, line_width=0)
 
     # Add supply zones to the chart
     for zone_pos in supply_zones:
@@ -162,6 +162,23 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                       y0=tickerData.iloc[low]['Low'], y1=tickerData.iloc[low]['Low'],
                       line=dict(color="black", width=2, dash="dash"),
                       opacity=0.1)
+
+    # Find the closest demand and supply zones
+    closest_demand, closest_supply = find_closest_zones(tickerData, demand_zones, supply_zones)
+
+    # Calculate the points for the two lines
+    split1, split2 = calculate_split_lines(tickerData, closest_demand, closest_supply)
+
+    # Add the two lines to the chart
+    fig.add_shape(type="line",
+                  x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
+                  y0=split1, y1=split1,
+                  line=dict(color="black", width=2, dash="dot"))
+
+    fig.add_shape(type="line",
+                  x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
+                  y0=split2, y1=split2,
+                  line=dict(color="black", width=2, dash="dot"))
 
     # Determine the interval of the data
     data_interval = tickerData.index[1] - tickerData.index[0]

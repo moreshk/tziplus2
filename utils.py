@@ -360,3 +360,23 @@ def identify_trend(tickerData, major_highs, major_lows):
                 trends[i] = 'side'
 
     return trends
+
+
+def find_closest_zones(tickerData, demand_zones, supply_zones):
+    """Find the closest demand and supply zones to the last candle's close price."""
+    last_close = tickerData.iloc[-1]['Close']
+    
+    closest_demand = min(demand_zones, key=lambda pos: abs(tickerData.iloc[pos]['Low'] - last_close))
+    closest_supply = min(supply_zones, key=lambda pos: abs(tickerData.iloc[pos]['High'] - last_close))
+    
+    return closest_demand, closest_supply
+
+def calculate_split_lines(tickerData, demand_pos, supply_pos):
+    """Calculate the points for the two lines that split the region between the low of the supply zone and the high of the demand zone into three."""
+    demand_price = tickerData.iloc[demand_pos]['High']
+    supply_price = tickerData.iloc[supply_pos]['Low']
+    
+    split1 = demand_price + (supply_price - demand_price) / 3
+    split2 = demand_price + 2 * (supply_price - demand_price) / 3
+    
+    return split1, split2
