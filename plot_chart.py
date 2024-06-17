@@ -2,6 +2,7 @@ import plotly.graph_objects as go
 import logging
 import pandas as pd
 import numpy as np  # Ensure NumPy is imported
+from utils import is_boring_candle, is_exciting_candle, calculate_average_body_size, calculate_average_volume
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,18 +20,17 @@ def find_nearest_date(index, target):
     nearest_index = np.abs(index - target).argmin()
     return index[nearest_index]
 
-
 def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, major_lows, tickerSymbol):
     """Create a candlestick chart with colored candles, FVGs, major highs/lows, and volume."""
     fig = go.Figure()
 
-    
-
-    # Scale volume data to 50% of the chart height
-    max_volume = tickerData['Volume'].max()
-    scaled_volume = tickerData['Volume'] / max_volume * 0.5 * tickerData['High'].max()
+    # Calculate average body size and volume for boring and exciting candle detection
+    average_body_size = calculate_average_body_size(tickerData)
+    average_volume = calculate_average_volume(tickerData)
 
     # Add volume data as a bar chart on a secondary y-axis
+    max_volume = tickerData['Volume'].max()
+    scaled_volume = tickerData['Volume'] / max_volume * 0.5 * tickerData['High'].max()
     fig.add_trace(go.Bar(x=tickerData.index,
                          y=scaled_volume,
                          name='Volume',
@@ -38,14 +38,57 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                          opacity=0.6, 
                          yaxis='y2'))
     
-    fig.add_trace(go.Candlestick(x=tickerData.index,
-                                 open=tickerData['Open'],
-                                 high=tickerData['High'],
-                                 low=tickerData['Low'],
-                                 close=tickerData['Close'],
-                                 increasing_line_color='blue',   
-                                 decreasing_line_color='black',
-                                 name='Price'))
+    # Add candlestick data with custom colors
+    for i in range(len(tickerData)):
+        candle = tickerData.iloc[i]
+        is_boring = is_boring_candle(candle, average_body_size, average_volume)
+        is_exciting, candle_type = is_exciting_candle(candle, average_body_size, average_volume)
+
+        pattern_shape = None  # Initialize pattern_shape
+
+        if is_boring:
+            color = 'white'
+            line_color = 'blue' if candle['Close'] > candle['Open'] else 'black'
+        elif is_exciting:
+            if candle_type == 'Bullish':
+                color = 'green'
+                line_color = 'green'
+                # pattern_shape = 'x'
+            else:
+                color = 'black'
+                line_color = 'black'
+        else:
+            color = 'blue' if candle['Close'] > candle['Open'] else 'black'
+            line_color = color
+
+        fig.add_trace(go.Candlestick(
+            x=[candle.name],
+            open=[candle['Open']],
+            high=[candle['High']],
+            low=[candle['Low']],
+            close=[candle['Close']],
+            increasing_line_color=line_color,
+            decreasing_line_color=line_color,
+            increasing_fillcolor=color,
+            decreasing_fillcolor=color,
+            name='Price',
+            showlegend=False,
+            hoverinfo='x+y+name'
+        ))
+
+        if pattern_shape:
+            fig.add_trace(go.Scatter(
+                x=[candle.name],
+                y=[candle['Close']],
+                mode='markers',
+                marker=dict(
+                    symbol=pattern_shape,
+                    size=10,
+                    color='green' if candle_type == 'Bullish' else 'red'
+                ),
+                showlegend=False,
+                hoverinfo='skip'
+            ))
 
     # Modify FVGs to the chart based on position
     for fvg in fvg_list:
@@ -58,8 +101,6 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                       x0=tickerData.index[start_pos], x1=tickerData.index[end_pos],
                       y0=y0, y1=y1,
                       fillcolor=color, opacity=0.3, line_width=2)
-
-    
 
     # Add demand zones to the chart
     for zone_pos in demand_zones:
@@ -87,13 +128,12 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                         y0=y0, y1=y1,
                         fillcolor="black", opacity=0.3, line_width=0)
             
-    
-     # Add horizontal dashed lines for major highs and lows
+    # Add horizontal dashed lines for major highs and lows
     for high in major_highs:
         fig.add_shape(type="line",
                       x0=tickerData.index[high], x1=tickerData.index[-1],
                       y0=tickerData.iloc[high]['High'], y1=tickerData.iloc[high]['High'],
-                      line=dict(color="blue", width=2, dash="dash"),
+                                            line=dict(color="blue", width=2, dash="dash"),
                       opacity=0.1)
 
     for low in major_lows:
@@ -102,7 +142,6 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                       y0=tickerData.iloc[low]['Low'], y1=tickerData.iloc[low]['Low'],
                       line=dict(color="black", width=2, dash="dash"),
                       opacity=0.1)
-
 
     # Determine the interval of the data
     data_interval = tickerData.index[1] - tickerData.index[0]

@@ -131,7 +131,7 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
                 # Check for any candle to the right with a close lower than the close of the demand zone candle
                 invalid_zone = False
                 for i in range(current_pos + 1, len(tickerData)):
-                    if tickerData.iloc[i]['Close'] < candle['High']:
+                    if tickerData.iloc[i]['Close'] < candle['Close']:
                         invalid_zone = True
                         break
 
@@ -207,7 +207,7 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
                 # Check for any candle to the right with a close higher than the high of the supply zone candle
                 invalid_zone = False
                 for i in range(current_pos + 1, len(tickerData)):
-                    if tickerData.iloc[i]['Close'] > candle['Low']:
+                    if tickerData.iloc[i]['Close'] > candle['Close']:
                         invalid_zone = True
                         break
 
