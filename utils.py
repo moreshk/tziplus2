@@ -127,25 +127,19 @@ def identify_demand_zones(tickerData, major_lows, candles_count, comparison_mult
                     continue  # Skip if out of bounds
                 # Get the 'High' of the demand zone candle (major low candle)
                 demand_zone_high = candle['High']
-                major_low = candle['Low']
 
-                # Calculate the absolute differences
-                abs_diff_decline = abs(major_low - pre_low)
-                abs_diff_increase = abs(post_low - major_low)
+                # Check for any candle to the right with a close lower than the close of the demand zone candle
+                invalid_zone = False
+                for i in range(current_pos + 1, len(tickerData)):
+                    if tickerData.iloc[i]['Close'] < candle['High']:
+                        invalid_zone = True
+                        break
 
-                if abs_diff_increase > comparison_multiplier * abs_diff_decline:
-                    # Check for any candle to the right with a close lower than the close of the demand zone candle
-                    invalid_zone = False
-                    for i in range(current_pos + 1, len(tickerData)):
-                        if tickerData.iloc[i]['Close'] < candle['High']:
-                            invalid_zone = True
-                            break
-
-                    if not invalid_zone:
-                        demand_zones.append(current_pos)
-                        logging.info(f"Demand zone identified at position {current_pos}: {candle.to_dict()}, "
-                                     f"Average body size: {average_body_size}, Average volume: {average_volume}, "
-                                     f"Body size: {abs(candle['Open'] - candle['Close'])}, Volume: {candle['Volume']}")
+                if not invalid_zone:
+                    demand_zones.append(current_pos)
+                    logging.info(f"Demand zone identified at position {current_pos}: {candle.to_dict()}, "
+                                 f"Average body size: {average_body_size}, Average volume: {average_volume}, "
+                                 f"Body size: {abs(candle['Open'] - candle['Close'])}, Volume: {candle['Volume']}")
 
     if not demand_zones:
         logging.info("No demand zones were identified.")
@@ -209,26 +203,18 @@ def identify_supply_zones(tickerData, major_highs, candles_count, comparison_mul
                     continue  # Skip if out of bounds
                 # Get the 'Low' of the supply zone candle (major high candle)
                 supply_zone_low = candle['Low']
-                major_high = candle['High']
 
-                # Calculate the absolute differences
-                abs_diff_increase = abs(major_high - pre_high)
-                abs_diff_decline = abs(post_high - major_high)
+                # Check for any candle to the right with a close higher than the high of the supply zone candle
+                invalid_zone = False
+                for i in range(current_pos + 1, len(tickerData)):
+                    if tickerData.iloc[i]['Close'] > candle['Low']:
+                        invalid_zone = True
+                        break
 
-                # Check if the absolute decline is more than the absolute increase by a factor of the comparison_multiplier
-                if abs_diff_decline > comparison_multiplier * abs_diff_increase:
-                    # Check for any candle to the right with a close higher than the high of the supply zone candle
-                    invalid_zone = False
-                    for i in range(current_pos + 1, len(tickerData)):
-                        if tickerData.iloc[i]['Close'] > candle['Low']:
-                            invalid_zone = True
-                            break
-
-                    if not invalid_zone:
-                        supply_zones.append(current_pos)
-                        logging.info(f"Supply zone identified at position {current_pos}: {candle.to_dict()}, "
-                                     f"Average body size: {average_body_size}, Average volume: {average_volume}, "
-                                     f"Body size: {abs(candle['Open'] - candle['Close'])}, Volume: {candle['Volume']}")
+                if not invalid_zone:
+                    supply_zones.append(current_pos)
+                    logging.info(f"Supply zone identified at position {current_pos}: {candle.to_dict()}, "
+                                 f"Body size: {abs(candle['Open'] - candle['Close'])}, Volume: {candle['Volume']}")
 
     if not supply_zones:
         logging.info("No supply zones were identified.")
@@ -247,30 +233,6 @@ def calculate_average_volume(tickerData):
     average_volume = valid_data['Volume'].mean()
     return average_volume
 
-
-# def is_boring_candle(candle, average_body_size, average_volume):
-#     """Identify if a particular candle is a boring candle.
-    
-#     A boring candle has:
-#     - Body size lower than the average body size
-#     - Volume lower than the average volume
-#     - Body size lower than its total wick (upper shadow + lower shadow)
-#     """
-#     body_size = abs(candle['Open'] - candle['Close'])
-#     lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
-#     upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
-#     total_wick = lower_shadow + upper_shadow
-
-#     is_boring = (body_size < average_body_size and
-#                 #  candle['Volume'] < average_volume and
-#                  body_size <= 0.5 * total_wick)
-
-#     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
-#                  f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
-#                  f"Average body size: {average_body_size}, Average volume: {average_volume}, "
-#                  f"Volume: {candle['Volume']}, Is boring: {is_boring}")
-
-#     return is_boring
 
 
 def is_boring_candle(candle, average_body_size, average_volume):
@@ -296,46 +258,6 @@ def is_boring_candle(candle, average_body_size, average_volume):
 
     return is_boring
 
-# def is_exciting_candle(candle, average_body_size, average_volume):
-#     """Identify if a particular candle is an exciting candle and its type (bullish or bearish).
-    
-#     An exciting candle has:
-#     - Volume higher than the average volume
-#     - Body size at least 1.5 times the average body size
-#     - Body size at least 2 times the total wicks (upper shadow + lower shadow)
-    
-#     Returns:
-#     - is_exciting (bool): Whether the candle is exciting
-#     - type (str): 'Bullish' if the candle is bullish exciting, 'Bearish' if the candle is bearish exciting, 
-#                   'None' if the candle is not exciting
-#     """
-#     body_size = abs(candle['Open'] - candle['Close'])
-#     lower_shadow = min(candle['Open'], candle['Close']) - candle['Low']
-#     upper_shadow = candle['High'] - max(candle['Open'], candle['Close'])
-#     total_wick = lower_shadow + upper_shadow
-
-#     is_volume_exciting = candle['Volume'] > average_volume
-#     is_body_size_exciting = body_size >= average_body_size
-#     is_body_size_greater_than_wick = body_size >= total_wick
-
-#     is_exciting = is_volume_exciting and is_body_size_exciting and is_body_size_greater_than_wick
-
-#     if is_exciting:
-#         if candle['Close'] > candle['Open']:
-#             candle_type = 'Bullish'
-#         else:
-#             candle_type = 'Bearish'
-#     else:
-#         candle_type = 'None'
-
-#     logging.info(f"Checking candle at position: {candle.name}, Body size: {body_size}, "
-#                  f"Lower shadow: {lower_shadow}, Upper shadow: {upper_shadow}, Total wick: {total_wick}, "
-#                  f"Average body size: {average_body_size}, Average volume: {average_volume}, "
-#                  f"Volume: {candle['Volume']}, Is volume exciting: {is_volume_exciting}, "
-#                  f"Is body size exciting: {is_body_size_exciting}, Is body size greater than wick: {is_body_size_greater_than_wick}, "
-#                  f"Is exciting: {is_exciting}, Type: {candle_type}")
-
-#     return is_exciting, candle_type
 
 
 def is_exciting_candle(candle, average_body_size, average_volume):
