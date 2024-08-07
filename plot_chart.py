@@ -163,23 +163,43 @@ def plot_chart(tickerData, fvg_list, demand_zones, supply_zones, major_highs, ma
                       line=dict(color="black", width=2, dash="dash"),
                       opacity=0.1)
 
+    # # Find the closest demand and supply zones
+    # closest_demand, closest_supply = find_closest_zones(tickerData, demand_zones, supply_zones)
+
+    # # Calculate the points for the two lines
+    # split1, split2 = calculate_split_lines(tickerData, closest_demand, closest_supply)
+
+    # # Add the two lines to the chart
+    # fig.add_shape(type="line",
+    #               x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
+    #               y0=split1, y1=split1,
+    #               line=dict(color="black", width=2, dash="dot"))
+
+    # fig.add_shape(type="line",
+    #               x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
+    #               y0=split2, y1=split2,
+    #               line=dict(color="black", width=2, dash="dot"))
+
     # Find the closest demand and supply zones
     closest_demand, closest_supply = find_closest_zones(tickerData, demand_zones, supply_zones)
 
-    # Calculate the points for the two lines
-    split1, split2 = calculate_split_lines(tickerData, closest_demand, closest_supply)
+    # Check if both demand and supply zones have been identified
+    if closest_demand is not None and closest_supply is not None:
+        
+        # Calculate the points for the two lines
+        split1, split2 = calculate_split_lines(tickerData, closest_demand, closest_supply)
 
-    # Add the two lines to the chart
-    fig.add_shape(type="line",
-                  x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
-                  y0=split1, y1=split1,
-                  line=dict(color="black", width=2, dash="dot"))
+        # Add the two lines to the chart
+        fig.add_shape(type="line",
+                    x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
+                    y0=split1, y1=split1,
+                    line=dict(color="black", width=2, dash="dot"))
 
-    fig.add_shape(type="line",
-                  x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
-                  y0=split2, y1=split2,
-                  line=dict(color="black", width=2, dash="dot"))
-
+        fig.add_shape(type="line",
+                    x0=tickerData.index[closest_demand], x1=tickerData.index[-1],
+                    y0=split2, y1=split2,
+                    line=dict(color="black", width=2, dash="dot"))
+        
     # Determine the interval of the data
     data_interval = tickerData.index[1] - tickerData.index[0]
 
